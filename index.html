@@ -2,318 +2,249 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Colosseum Escape: Roman Architect By Roy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Vomitoria: The 5 Sectors of Rome</title>
     <style>
         :root {
-            --bg: #1a1a1a;
-            --stone: #7f8c8d;
-            --path-off: #2c3e50;
-            --path-on: #e74c3c;
-            --gold: #f1c40f;
-            --roman-red: #8b0000;
-            --gladiator-bg: #4a231e;
-            --scroll-bg: #f4e4bc;
+            --bg: #1a1a1a; --stone: #7f8c8d; --path-off: #2c3e50;
+            --path-on: #e74c3c; --gold: #f1c40f; --roman-red: #8b0000;
+            --gladiator-bg: #4a231e; --scroll-bg: #f4e4bc;
+            --tile-size: 60px; --tile-size-small: 40px;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0; padding: 20px;
-            user-select: none;
-            overflow: hidden;
-        }
-
-        .hud {
-            display: flex; gap: 20px; width: 100%; max-width: 600px;
-            justify-content: space-between; align-items: center;
-            background: #333; padding: 15px; border-radius: 10px;
-            border-bottom: 3px solid var(--gold); margin-bottom: 10px;
-        }
-        .hud-item { font-size: 1.1rem; font-weight: bold; }
-        #timer { color: var(--gold); font-family: monospace; font-size: 1.4rem; }
-        .danger { color: #ff4444 !important; animation: pulse 0.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        #board-container {
-            display: flex; justify-content: center; align-items: center;
-            flex-grow: 1; margin: 10px 0;
-        }
-        #board {
-            display: grid; gap: 4px; background: #444; padding: 8px;
-            border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .tile {
-            width: 60px; height: 60px; background: var(--stone);
-            border-radius: 4px; position: relative; cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .tile.small { width: 45px; height: 45px; } 
-
-        .pipe-center {
-            position: absolute; width: 30%; height: 30%; background: var(--path-off);
-            left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
-        }
-        .pipe-arm { position: absolute; background: var(--path-off); transition: 0.3s; }
-        .arm-0 { width: 30%; height: 50%; left: 50%; top: 0; transform: translateX(-50%); }
-        .arm-1 { width: 50%; height: 30%; right: 0; top: 50%; transform: translateY(-50%); }
-        .arm-2 { width: 30%; height: 50%; left: 50%; bottom: 0; transform: translateX(-50%); }
-        .arm-3 { width: 50%; height: 30%; left: 0; top: 50%; transform: translateY(-50%); }
-
-        .tile.active .pipe-center, .tile.active .pipe-arm {
-            background: var(--path-on); box-shadow: 0 0 10px var(--path-on);
-        }
-
-        .tile.locked { border: 2px solid var(--gold); box-sizing: border-box; }
-        .tile.gladiator { background: var(--gladiator-bg); cursor: not-allowed; border: 2px solid #e74c3c; }
-        .icon { position: absolute; font-size: 24px; z-index: 10; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); z-index: 200;
-            display: none; justify-content: center; align-items: center;
-            flex-direction: column; text-align: center;
-        }
-        .modal {
-            background: var(--scroll-bg); color: #2b1d0e; padding: 30px;
-            max-width: 500px; border-radius: 8px; border: 8px double var(--roman-red);
-            box-shadow: 0 0 60px rgba(0,0,0,0.9);
-        }
-        .modal h2 { color: var(--roman-red); border-bottom: 2px solid #8d6e63; padding-bottom: 10px; margin-top: 0;}
-        .modal p { font-size: 1rem; line-height: 1.5; text-align: left; }
-        .modal ul { text-align: left; padding-left: 20px; }
-        .modal li { margin-bottom: 10px; font-weight: bold; }
         
-        .big-btn {
-            background: var(--roman-red); color: white; border: none; padding: 12px 35px;
-            font-size: 1.1rem; font-weight: bold; border-radius: 50px;
-            cursor: pointer; margin-top: 15px;
+        /* 深度平板适配：确保顶部HUD在任何情况下都可见 */
+        @media (max-width: 1100px) {
+            :root { --tile-size: 7.5vmin; --tile-size-small: 5.5vmin; }
+            .hud { 
+                width: 100% !important; 
+                border-radius: 0 !important;
+                padding-top: calc(env(safe-area-inset-top) + 10px) !important;
+            }
         }
-        .secondary-btn {
-            background: transparent; border: 2px solid var(--roman-red); color: var(--roman-red);
-            margin-top: 10px; padding: 8px 25px; border-radius: 50px; cursor: pointer; font-weight: bold;
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 0; user-select: none; overflow: hidden; height: 100vh; width: 100vw; }
+        
+        /* 修改为 Fixed 定位，防止被页面其他元素挤压或隐藏 */
+        .hud { 
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex; 
+            width: 95%; 
+            max-width: 800px; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(30, 39, 46, 0.98); 
+            padding: 12px 25px; 
+            border: 2px solid var(--gold); 
+            border-radius: 0 0 15px 15px; 
+            border-top: none; 
+            z-index: 1000; /* 极高层级 */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8); 
+            box-sizing: border-box;
         }
+        
+        #timer { color: var(--gold); font-family: monospace; font-size: 1.3rem; font-weight: bold; }
+        .danger { color: #ff4d4d !important; animation: blink 0.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
+
+        /* 为顶部的 Fixed HUD 预留空间 */
+        #board-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-grow: 1; 
+            width: 100%; 
+            overflow: hidden; 
+            padding-top: 80px; /* 重要：防止棋盘顶到HUD */
+            box-sizing: border-box; 
+        }
+        #board { display: grid; gap: 4px; background: #333; padding: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .tile { width: var(--tile-size); height: var(--tile-size); background: var(--stone); border-radius: 6px; position: relative; cursor: pointer; transition: transform 0.25s; }
+        .tile.small { width: var(--tile-size-small); height: var(--tile-size-small); } 
+        .pipe-center { position: absolute; width: 32%; height: 32%; background: var(--path-off); left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; border-radius: 2px; }
+        .pipe-arm { position: absolute; background: var(--path-off); transition: 0.3s; }
+        .arm-0 { width: 32%; height: 50%; left: 50%; top: 0; transform: translateX(-50%); }
+        .arm-1 { width: 50%; height: 32%; right: 0; top: 50%; transform: translateY(-50%); }
+        .arm-2 { width: 32%; height: 50%; left: 50%; bottom: 0; transform: translateX(-50%); }
+        .arm-3 { width: 50%; height: 32%; left: 0; top: 50%; transform: translateY(-50%); }
+        
+        .tile.active .pipe-center, .tile.active .pipe-arm { background: var(--path-on); box-shadow: 0 0 10px var(--path-on); }
+        .tile.gladiator { background: var(--gladiator-bg); cursor: not-allowed; border: 2px solid #ff4d4d; }
+        .tile.arch { background: #4b6584; border: 2px solid var(--gold); box-sizing: border-box; }
+        
+        .icon { position: absolute; font-size: 1.5rem; z-index: 10; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: transform 0.25s; }
+        
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
+        .modal { background: var(--scroll-bg); color: #2b1d0e; padding: 25px; width: 90%; max-width: 480px; border-radius: 12px; border: 8px double var(--roman-red); box-sizing: border-box; box-shadow: 0 0 40px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto; }
+        .big-btn { background: var(--roman-red); color: white; border: none; padding: 14px 20px; font-size: 1.1rem; font-weight: bold; border-radius: 50px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.2s; }
+        
+        #flash { position: fixed; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 3000; }
+        .victory-flash { animation: flashAnim 0.5s ease-out; }
+        @keyframes flashAnim { 0% { opacity: 0.5; } 100% { opacity: 0; } }
+
+        #score-list { text-align: left; margin: 15px 0; padding: 0; list-style: none; }
+        #score-list li { border-bottom: 1px dashed #8d6e63; padding: 8px 0; display: flex; justify-content: space-between; font-weight: bold; }
+        #player-name { padding: 12px; width: 100%; margin: 10px 0; border: 2px solid var(--roman-red); border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
     </style>
 </head>
 <body>
 
+    <div id="flash"></div>
+
     <div class="hud">
-        <div class="hud-item">🏟️ Sector: <span id="level-name">Loading...</span></div>
-        <div class="hud-item">⏳ Time: <span id="timer">60</span>s</div>
+        <div class="hud-item">🏟️ <span id="level-name">Area 1</span></div>
+        <div class="hud-item">⏳ <span id="timer">60</span>s</div>
+        <div class="hud-item">🏆 Best: <span id="best-score">0</span>s</div>
     </div>
 
-    <div id="board-container">
-        <div id="board"></div>
-    </div>
+    <div id="board-container"><div id="board"></div></div>
 
     <div id="modal-story" class="overlay" style="display: flex;">
         <div class="modal">
-            <h2>📜 The Roman Mission</h2>
-            <p>The year is <b>AD 80</b>. You are the head builder for the Roman Emperor.</p>
-            <p>50,000 Roman citizens are inside the <b>Colosseum</b>. The show is over, and everyone wants to go home!</p>
-            <p>The hallways (called <b>Vomitoria</b>) are all mixed up. If you don't fix them fast, the crowd will get angry!</p>
-            <button class="big-btn" onclick="showRules()">Next: How to Play</button>
+            <h1 style="color: var(--roman-red); margin: 0; font-size: 2em;">AD 80: ROME</h1>
+            <p style="font-style: italic; color: #5d4037;">"Panem et Circenses" (Bread and Circuses)</p>
+            <p>The <b>Great Colosseum</b> is finally open! Emperor Titus has hosted a 100-day celebration. But as the sun sets, 50,000 excited citizens are rushing to the exits at once!</p>
+            <p>You are the <b>Imperial Architect</b>. A group of angry gladiators has damaged the complex hallways, known as <b>Vomitoria</b>. If people can't get out, a chaos will start!</p>
+            <button class="big-btn" onclick="showRules()">Approach the Gates</button>
         </div>
     </div>
 
     <div id="modal-rules" class="overlay">
         <div class="modal">
-            <h2>📋 How to Play</h2>
-            <p>Be fast! The Emperor is watching!</p>
-            <ul>
-                <li><b>Click a Tile:</b> Rotate it to fix the path.</li>
-                <li><b>Make it Glow:</b> Connect Seats (🏟️) to the Gate (🚪).</li>
-                <li><b>Avoid Gladiators (⚔️):</b> They are fighting! You must go around them.</li>
-                <li><b>Gain Time:</b> Clear levels 1, 2, and 3 to get <b>+30 seconds</b>.</li>
+            <h2>📜 How to Play</h2>
+            <ul style="text-align: left; line-height: 1.6; font-weight: bold; color: #5d4037;">
+                <li>🔄 <b>Tap</b> tiles to rotate and connect paths.</li>
+                <li>🏰 Connect <b>Arena (🏟️)</b> to <b>City Gates (🚪)</b>.</li>
+                <li>🏛️ <b>Hell Mode</b>: You MUST pass through the Great Arch!</li>
+                <li>🏅 <b>Hall of Fame</b>: Only the Top 10 fastest architects will be carved in stone!</li>
             </ul>
-            <button class="big-btn" onclick="startGame()">Start Game!</button>
-            <br>
-            <button class="secondary-btn" onclick="backToStory()">Go Back</button>
+            <button class="big-btn" onclick="startGame()">Save the People!</button>
         </div>
     </div>
 
     <div id="modal-next" class="overlay">
         <div class="modal">
-            <h2>🎉 Level Clear!</h2>
-            <p style="text-align: center;">The crowd is safe. Keep going!</p>
-            <p style="text-align: center; color: green; font-weight: bold; font-size: 1.2em;">+30 Seconds Bonus</p>
-            <button class="big-btn" onclick="nextLevel()">Next Level</button>
-        </div>
-    </div>
-
-    <div id="modal-fail" class="overlay">
-        <div class="modal">
-            <h2>💀 Too Late!</h2>
-            <p style="text-align: center;">The crowd got stuck. Rome is in chaos!</p>
-            <button class="big-btn" onclick="location.reload()">Try Again</button>
+            <h2 style="color: #27ae60;">✨ AREA SECURED! ✨</h2>
+            <p>The crowd flows safely. Keep going!</p>
+            <p style="font-size: 1.5rem; font-weight: bold; color: var(--roman-red);">+30s TIME BONUS</p>
+            <button class="big-btn" onclick="nextLevel()">Next Area</button>
         </div>
     </div>
 
     <div id="modal-win" class="overlay">
         <div class="modal">
-            <h2>🏆 Ultimate Victory!</h2>
-            <p style="text-align: center;">You have conquered <b>HELL MODE</b>!</p>
-            <p style="text-align: center;">You saved all 50,000 Roman citizens. You are a hero of Rome!</p>
-            <p style="text-align: center; font-size: 1.2em; border-top: 1px solid #ccc; padding-top: 10px;">
-                Final Time Left: <span id="final-time" style="color: #d35400; font-weight: bold;"></span>s
-            </p>
-            <div style="font-size: 3rem; margin: 10px;">👍</div>
+            <h2 style="color: var(--gold); text-shadow: 1px 1px 2px #000;">🏛️ HERO OF ROME 🏛️</h2>
+            <p>You saved the citizens from a deadly crush!</p>
+            <p>Final Time: <b id="final-time"></b>s</p>
+            <p>Title: <span id="title-rank" style="font-weight: bold; color: var(--roman-red);">...</span></p>
+            <hr>
+            <input type="text" id="player-name" placeholder="Your Name..." maxlength="12">
+            <button class="big-btn" onclick="saveScore()">Save My Name</button>
+        </div>
+    </div>
+
+    <div id="modal-leaderboard" class="overlay">
+        <div class="modal">
+            <h2>📜 Top 10 Heroes</h2>
+            <ol id="score-list"></ol>
             <button class="big-btn" onclick="location.reload()">Play Again</button>
         </div>
     </div>
 
+    <div id="modal-fail" class="overlay"><div class="modal"><h2>💀 TOO SLOW!</h2><button class="big-btn" onclick="location.reload()">Restart</button></div></div>
+
     <script>
         const LEVELS = [
-            { name: "1. Easy", size: 3, glads: 0 },
-            { name: "2. Normal", size: 4, glads: 0 },
-            { name: "3. Hard", size: 6, glads: 3 },
-            { name: "4. HELL MODE", size: 8, glads: 5 }
+            { name: "Area 1: The Gate", size: 3, glads: 0, hasArch: false },
+            { name: "Area 2: Long Tunnel", size: 4, glads: 1, hasArch: false },
+            { name: "Area 3: Secret Room", size: 5, glads: 2, hasArch: false },
+            { name: "Area 4: The Great Wall", size: 6, glads: 3, hasArch: false },
+            { name: "Area 5: THE BIG ARCH", size: 8, glads: 5, hasArch: true }
         ];
 
-        let currentLevelIdx = 0;
-        let timeLeft = 60;
-        let timerInterval = null;
-        let grid = [];
-        let isPaused = true;
+        let currentIdx = 0, timeLeft = 60, timerInterval = null, grid = [], isPaused = true;
         const UP=0, RIGHT=1, DOWN=2, LEFT=3;
 
-        function showRules() {
-            document.getElementById('modal-story').style.display = 'none';
-            document.getElementById('modal-rules').style.display = 'flex';
-        }
-        function backToStory() {
-            document.getElementById('modal-rules').style.display = 'none';
-            document.getElementById('modal-story').style.display = 'flex';
-        }
-        function startGame() {
-            document.getElementById('modal-rules').style.display = 'none';
-            currentLevelIdx = 0; timeLeft = 60;
-            startLevel(); startTimer();
-        }
-        function startLevel() {
-            isPaused = false;
-            const config = LEVELS[currentLevelIdx];
-            document.getElementById('level-name').innerText = config.name;
-            const boardEl = document.getElementById('board');
-            boardEl.style.gridTemplateColumns = `repeat(${config.size}, ${config.size > 6 ? 45 : 60}px)`;
-            generateLevel(config); render(config); checkConnectivity();
-        }
-        function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if(!isPaused) { timeLeft--; updateTimerUI(); if(timeLeft <= 0) gameOver(); }
-            }, 1000);
-        }
-        function updateTimerUI() {
-            const el = document.getElementById('timer');
-            el.innerText = timeLeft;
-            if(timeLeft <= 10) el.classList.add('danger'); else el.classList.remove('danger');
-        }
+        const history = JSON.parse(localStorage.getItem('vomitoria_scores')) || [];
+        document.getElementById('best-score').innerText = history.length > 0 ? history[0].score : 0;
 
-        // --- WIN LOGIC ---
-        function handleWin() {
-            isPaused = true;
-            // Check if this was the last level (HELL MODE)
-            if (currentLevelIdx === LEVELS.length - 1) {
-                // Skip next-level pop-up, skip extra time, go to final victory
-                clearInterval(timerInterval);
-                document.getElementById('final-time').innerText = timeLeft;
-                document.getElementById('modal-win').style.display = 'flex';
-            } else {
-                // Not the last level: add time and show intermediate pop-up
-                timeLeft += 30;
-                updateTimerUI();
-                document.getElementById('modal-next').style.display = 'flex';
-            }
-        }
-
-        function nextLevel() {
-            document.getElementById('modal-next').style.display = 'none';
-            currentLevelIdx++;
-            startLevel();
-        }
-
-        function gameOver() { 
-            isPaused = true; 
-            clearInterval(timerInterval); 
-            document.getElementById('modal-fail').style.display = 'flex'; 
-        }
+        function showRules() { document.getElementById('modal-story').style.display='none'; document.getElementById('modal-rules').style.display='flex'; }
+        function startGame() { document.getElementById('modal-rules').style.display='none'; currentIdx=0; timeLeft=60; startLevel(); startTimer(); }
+        function startLevel() { isPaused=false; const config=LEVELS[currentIdx]; document.getElementById('level-name').innerText=config.name; const b=document.getElementById('board'); b.style.gridTemplateColumns=`repeat(${config.size}, auto)`; generateLevel(config); render(config); checkConnectivity(config.size); }
+        function startTimer() { if(timerInterval) clearInterval(timerInterval); timerInterval=setInterval(()=>{ if(!isPaused){ timeLeft--; document.getElementById('timer').innerText=timeLeft; if(timeLeft<=10) document.getElementById('timer').classList.add('danger'); if(timeLeft<=0) gameOver(); }}, 1000); }
         
-        // --- Map Generation ---
         function generateLevel(config) {
             grid = []; const size = config.size;
             for(let y=0; y<size; y++) for(let x=0; x<size; x++) grid.push({ x, y, rotation: 0, arms: [], type: 'normal', active: false, el: null });
-            getTile(0,0, size).type = 'start'; getTile(0,0, size).arms = [UP];
-            getTile(size-1, size-1, size).type = 'end'; getTile(size-1, size-1, size).arms = [DOWN];
-            let gladsPlaced = 0;
-            while(gladsPlaced < config.glads) {
-                let rx = Math.floor(Math.random()*size); let ry = Math.floor(Math.random()*size);
-                let t = getTile(rx, ry, size); if(t.type === 'normal') { t.type = 'gladiator'; gladsPlaced++; }
-            }
-            if (!createPath(size)) { generateLevel(config); return; }
-            grid.forEach(t => {
-                if(t.type === 'normal' && t.arms.length === 0) t.arms = Math.random() > 0.5 ? [0, 2] : [0, 1];
-                if(t.type === 'normal') t.rotation = Math.floor(Math.random() * 4);
-            });
+            getTile(0,0,size).type='start'; getTile(0,0,size).arms=[UP]; getTile(size-1,size-1,size).type='end'; getTile(size-1,size-1,size).arms=[DOWN];
+            let archPos=null; if(config.hasArch){ let mid=Math.floor(size/2); archPos={x:mid,y:mid}; getTile(mid,mid,size).type='arch'; }
+            let g=0; while(g<config.glads){ let rx=Math.floor(Math.random()*size), ry=Math.floor(Math.random()*size); let t=getTile(rx,ry,size); if(t.type==='normal'){t.type='gladiator'; g++;} }
+            if(config.hasArch){ if(!createPath(0,0,archPos.x,archPos.y,size)||!createPath(archPos.x,archPos.y,size-1,size-1,size)) return generateLevel(config); }
+            else { if(!createPath(0,0,size-1,size-1,size)) return generateLevel(config); }
+            grid.forEach(t=>{ if(t.type==='normal'&&t.arms.length===0) t.arms=Math.random()>0.5?[0,2]:[0,1]; if(t.type!=='start'&&t.type!=='end') t.rotation=Math.floor(Math.random()*4); });
         }
-        function createPath(size) {
-            let curr = {x:0, y:0}; let path = [curr]; let visited = new Set(['0,0']); let steps = 400;
-            while((curr.x !== size-1 || curr.y !== size-1) && steps > 0) {
-                steps--; let moves = [];
-                [{dx:1,dy:0},{dx:0,dy:1},{dx:-1,dy:0},{dx:0,dy:-1}].forEach(m => {
-                    let nx = curr.x+m.dx, ny = curr.y+m.dy;
-                    if(nx>=0 && nx<size && ny>=0 && ny<size && !visited.has(`${nx},${ny}`) && getTile(nx,ny,size).type !== 'gladiator') moves.push({x:nx,y:ny});
+
+        function createPath(sx,sy,ex,ey,size) {
+            let curr={x:sx,y:sy}, visited=new Set([`${sx},${sy}`]), steps=500;
+            while((curr.x!==ex||curr.y!==ey)&&steps>0){
+                steps--; let moves=[]; [{dx:1,dy:0,d:RIGHT,o:LEFT},{dx:0,dy:1,d:DOWN,o:UP},{dx:-1,dy:0,d:LEFT,o:RIGHT},{dx:0,dy:-1,d:UP,o:DOWN}].forEach(m=>{
+                    let nx=curr.x+m.dx, ny=curr.y+m.dy; if(nx>=0&&nx<size&&ny>=0&&ny<size&&!visited.has(`${nx},${ny}`)&&getTile(nx,ny,size).type!=='gladiator') moves.push({x:nx,y:ny,d:m.d,o:m.o});
                 });
-                if(moves.length === 0) return false;
-                curr = moves[Math.floor(Math.random()*moves.length)]; path.push(curr); visited.add(`${curr.x},${curr.y}`);
+                if(moves.length===0) return false; let move=moves[Math.floor(Math.random()*moves.length)]; getTile(curr.x,curr.y,size).arms.push(move.d); curr={x:move.x,y:move.y}; getTile(curr.x,curr.y,size).arms.push(move.o); visited.add(`${curr.x},${curr.y}`);
             }
-            if(curr.x !== size-1 || curr.y !== size-1) return false;
-            for(let i=0; i<path.length; i++) {
-                let t = getTile(path[i].x, path[i].y, size); let arms = [];
-                if(i > 0) arms.push(getRelativeDir(path[i], path[i-1])); else arms.push(UP);
-                if(i < path.length-1) arms.push(getRelativeDir(path[i], path[i+1])); else arms.push(DOWN);
-                t.arms = arms;
-            }
-            return true;
+            return curr.x===ex&&curr.y===ey;
         }
-        function getTile(x, y, size) { return grid[y*size + x]; }
-        function getRelativeDir(f, t) { if(t.y<f.y) return UP; if(t.x>f.x) return RIGHT; if(t.y>f.y) return DOWN; return LEFT; }
-        
+
+        function getTile(x,y,s) { return grid[y*s+x]; }
+
         function render(config) {
-            const b = document.getElementById('board'); b.innerHTML = '';
-            grid.forEach(t => {
-                let el = document.createElement('div'); el.className = 'tile' + (config.size>6?' small':'');
-                if(t.type === 'gladiator') { el.classList.add('gladiator'); el.innerHTML = '<div class="icon">⚔️</div>'; }
+            const b=document.getElementById('board'); b.innerHTML='';
+            grid.forEach(t=>{
+                let el=document.createElement('div'); el.className='tile'+(config.size>6?' small':'');
+                if(t.type==='gladiator'){ el.classList.add('gladiator'); el.innerHTML='<div class="icon">⚔️</div>'; }
                 else {
-                    if(t.type==='start') el.innerHTML = '<div class="icon">🏟️</div>'; else if(t.type==='end') el.innerHTML = '<div class="icon">🚪</div>';
-                    el.innerHTML += '<div class="pipe-center"></div>';
-                    t.arms.forEach(d => el.innerHTML += `<div class="pipe-arm arm-${d}"></div>`);
-                    if(t.type !== 'start' && t.type !== 'end') el.onclick = () => { if(!isPaused) { t.rotation = (t.rotation+1)%4; el.style.transform = `rotate(${t.rotation*90}deg)`; checkConnectivity(config.size); } };
+                    if(t.type==='start') el.innerHTML='<div class="icon">🏟️</div>'; else if(t.type==='end') el.innerHTML='<div class="icon">🚪</div>'; else if(t.type==='arch') { el.classList.add('arch'); el.innerHTML='<div class="icon">🏛️</div>'; }
+                    el.innerHTML+='<div class="pipe-center"></div>'; [...new Set(t.arms)].forEach(d=>el.innerHTML+=`<div class="pipe-arm arm-${d}"></div>`);
+                    if(t.type!=='start'&&t.type!=='end'){ el.onclick=()=>{ if(!isPaused){ t.rotation++; el.style.transform=`rotate(${t.rotation*90}deg)`; let ic=el.querySelector('.icon'); if(ic)ic.style.transform=`translate(-50%,-50%) rotate(-${t.rotation*90}deg)`; checkConnectivity(config.size); }}; }
                 }
-                el.style.transform = `rotate(${t.rotation*90}deg)`; t.el = el; b.appendChild(el);
+                el.style.transform=`rotate(${t.rotation*90}deg)`; let ic=el.querySelector('.icon'); if(ic)ic.style.transform=`translate(-50%,-50%) rotate(-${t.rotation*90}deg)`; t.el=el; b.appendChild(el);
             });
         }
+
         function checkConnectivity(size) {
-            grid.forEach(t => { t.active = false; if(t.el) t.el.classList.remove('active'); });
-            let q = [grid[0]]; grid[0].active = true; grid[0].el.classList.add('active');
-            let won = false;
-            while(q.length > 0) {
-                let c = q.shift(); if(c.type === 'end') won = true;
-                let cA = c.arms.map(a => (a+c.rotation)%4);
-                [{dx:0,dy:-1,d:UP,o:DOWN},{dx:1,dy:0,d:RIGHT,o:LEFT},{dx:0,dy:1,d:DOWN,o:UP},{dx:-1,dy:0,d:LEFT,o:RIGHT}].forEach(n => {
-                    let nx = c.x+n.dx, ny = c.y+n.dy;
-                    if(nx>=0 && nx<size && ny>=0 && ny<size) {
-                        let nt = getTile(nx,ny,size);
-                        if(nt.type !== 'gladiator' && !nt.active && cA.includes(n.d) && nt.arms.map(a=>(a+nt.rotation)%4).includes(n.o)) { nt.active=true; nt.el.classList.add('active'); q.push(nt); }
+            grid.forEach(t=>{t.active=false; if(t.el)t.el.classList.remove('active');});
+            let q=[grid[0]]; grid[0].active=true; let hasEnd=false, hasArch=false; const needsArch=LEVELS[currentIdx].hasArch;
+            while(q.length>0){
+                let c=q.shift(); c.el.classList.add('active'); if(c.type==='end')hasEnd=true; if(c.type==='arch')hasArch=true;
+                let cA=tArms(c); [{dx:0,dy:-1,d:UP,o:DOWN},{dx:1,dy:0,d:RIGHT,o:LEFT},{dx:0,dy:1,d:DOWN,o:UP},{dx:-1,dy:0,d:LEFT,o:RIGHT}].forEach(n=>{
+                    let nx=c.x+n.dx, ny=c.y+n.dy; if(nx>=0&&nx<size&&ny>=0&&ny<size){
+                        let nt=getTile(nx,ny,size); if(nt.type!=='gladiator'&&!nt.active&&cA.includes(n.d)&&tArms(nt).includes(n.o)){nt.active=true; q.push(nt);}
                     }
                 });
             }
-            if(won) setTimeout(handleWin, 300);
+            if(hasEnd&&(!needsArch||hasArch)) setTimeout(handleWin,300);
         }
+
+        function tArms(t) { return t.arms.map(a=>(a+(t.rotation%4))%4); }
+
+        function handleWin() {
+            isPaused=true; const f=document.getElementById('flash'); f.classList.add('victory-flash'); setTimeout(()=>f.classList.remove('victory-flash'),500);
+            if(currentIdx===LEVELS.length-1){ clearInterval(timerInterval); document.getElementById('final-time').innerText=timeLeft; let rank="Young Builder"; if(timeLeft>50) rank="Master Architect"; else if(timeLeft>30) rank="Great Engineer"; document.getElementById('title-rank').innerText=rank; document.getElementById('modal-win').style.display='flex'; }
+            else { timeLeft+=30; document.getElementById('modal-next').style.display='flex'; }
+        }
+
+        function nextLevel() { document.getElementById('modal-next').style.display='none'; currentIdx++; startLevel(); }
+        function gameOver() { isPaused=true; clearInterval(timerInterval); document.getElementById('modal-fail').style.display='flex'; }
+        
+        function saveScore() {
+            const name=document.getElementById('player-name').value.trim()||"Roman Hero";
+            let h=JSON.parse(localStorage.getItem('vomitoria_scores'))||[]; h.push({name:name,score:timeLeft}); h.sort((a,b)=>b.score-a.score); h=h.slice(0,10); localStorage.setItem('vomitoria_scores',JSON.stringify(h)); showLeaderboard();
+        }
+
+        function showLeaderboard() { document.querySelectorAll('.overlay').forEach(e=>e.style.display='none'); const list=document.getElementById('score-list'); const h=JSON.parse(localStorage.getItem('vomitoria_scores'))||[]; list.innerHTML=h.map((s,i)=>`<li><span class="${i<3?'rank-top':''}">#${i+1} ${s.name}</span><span>${s.score}s</span></li>`).join(''); document.getElementById('modal-leaderboard').style.display='flex'; }
     </script>
 </body>
 </html>
