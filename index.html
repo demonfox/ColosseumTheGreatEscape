@@ -3,66 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Vomitoria: The 5 Sectors of Rome</title>
+    <title>Vomitoria: The 10 Sectors of Rome</title>
     <style>
         :root {
             --bg: #1a1a1a; --stone: #7f8c8d; --path-off: #2c3e50;
             --path-on: #e74c3c; --gold: #f1c40f; --roman-red: #8b0000;
             --gladiator-bg: #4a231e; --scroll-bg: #f4e4bc;
-            --tile-size: 60px; --tile-size-small: 40px;
+            --tile-size: 60px; --tile-size-small: 35px;
         }
         
-        /* 深度平板适配：确保顶部HUD在任何情况下都可见 */
         @media (max-width: 1100px) {
-            :root { --tile-size: 7.5vmin; --tile-size-small: 5.5vmin; }
-            .hud { 
-                width: 100% !important; 
-                border-radius: 0 !important;
-                padding-top: calc(env(safe-area-inset-top) + 10px) !important;
-            }
+            :root { --tile-size: 7vmin; --tile-size-small: 4.5vmin; }
+            .hud { width: 100% !important; border-radius: 0 !important; padding-top: calc(env(safe-area-inset-top) + 10px) !important; }
         }
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 0; user-select: none; overflow: hidden; height: 100vh; width: 100vw; }
         
-        /* 修改为 Fixed 定位，防止被页面其他元素挤压或隐藏 */
-        .hud { 
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex; 
-            width: 95%; 
-            max-width: 800px; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(30, 39, 46, 0.98); 
-            padding: 12px 25px; 
-            border: 2px solid var(--gold); 
-            border-radius: 0 0 15px 15px; 
-            border-top: none; 
-            z-index: 1000; /* 极高层级 */
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8); 
-            box-sizing: border-box;
-        }
-        
+        .hud { position: fixed; top: 0; left: 50%; transform: translateX(-50%); display: flex; width: 95%; max-width: 800px; justify-content: space-between; align-items: center; background: rgba(30, 39, 46, 0.98); padding: 12px 25px; border: 2px solid var(--gold); border-radius: 0 0 15px 15px; border-top: none; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.8); box-sizing: border-box; }
         #timer { color: var(--gold); font-family: monospace; font-size: 1.3rem; font-weight: bold; }
         .danger { color: #ff4d4d !important; animation: blink 0.5s infinite; }
         @keyframes blink { 50% { opacity: 0.4; } }
 
-        /* 为顶部的 Fixed HUD 预留空间 */
-        #board-container { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            flex-grow: 1; 
-            width: 100%; 
-            overflow: hidden; 
-            padding-top: 80px; /* 重要：防止棋盘顶到HUD */
-            box-sizing: border-box; 
-        }
+        #board-container { display: flex; justify-content: center; align-items: center; flex-grow: 1; width: 100%; overflow: hidden; padding-top: 85px; box-sizing: border-box; }
         #board { display: grid; gap: 4px; background: #333; padding: 10px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .tile { width: var(--tile-size); height: var(--tile-size); background: var(--stone); border-radius: 6px; position: relative; cursor: pointer; transition: transform 0.25s; }
+        .tile { width: var(--tile-size); height: var(--tile-size); background: var(--stone); border-radius: 6px; position: relative; cursor: pointer; transition: transform 0.2s; }
         .tile.small { width: var(--tile-size-small); height: var(--tile-size-small); } 
         .pipe-center { position: absolute; width: 32%; height: 32%; background: var(--path-off); left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; border-radius: 2px; }
         .pipe-arm { position: absolute; background: var(--path-off); transition: 0.3s; }
@@ -74,8 +39,7 @@
         .tile.active .pipe-center, .tile.active .pipe-arm { background: var(--path-on); box-shadow: 0 0 10px var(--path-on); }
         .tile.gladiator { background: var(--gladiator-bg); cursor: not-allowed; border: 2px solid #ff4d4d; }
         .tile.arch { background: #4b6584; border: 2px solid var(--gold); box-sizing: border-box; }
-        
-        .icon { position: absolute; font-size: 1.5rem; z-index: 10; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; transition: transform 0.25s; }
+        .icon { position: absolute; font-size: 1.2rem; z-index: 10; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
         
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
         .modal { background: var(--scroll-bg); color: #2b1d0e; padding: 25px; width: 90%; max-width: 480px; border-radius: 12px; border: 8px double var(--roman-red); box-sizing: border-box; box-shadow: 0 0 40px rgba(0,0,0,0.8); max-height: 85vh; overflow-y: auto; }
@@ -84,14 +48,12 @@
         #flash { position: fixed; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 3000; }
         .victory-flash { animation: flashAnim 0.5s ease-out; }
         @keyframes flashAnim { 0% { opacity: 0.5; } 100% { opacity: 0; } }
-
         #score-list { text-align: left; margin: 15px 0; padding: 0; list-style: none; }
         #score-list li { border-bottom: 1px dashed #8d6e63; padding: 8px 0; display: flex; justify-content: space-between; font-weight: bold; }
         #player-name { padding: 12px; width: 100%; margin: 10px 0; border: 2px solid var(--roman-red); border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
     </style>
 </head>
 <body>
-
     <div id="flash"></div>
 
     <div class="hud">
@@ -129,40 +91,39 @@
         <div class="modal">
             <h2 style="color: #27ae60;">✨ AREA SECURED! ✨</h2>
             <p>The crowd flows safely. Keep going!</p>
-            <p style="font-size: 1.5rem; font-weight: bold; color: var(--roman-red);">+30s TIME BONUS</p>
+            <p style="font-size: 1.5rem; font-weight: bold; color: var(--roman-red);">+35s TIME BONUS</p>
             <button class="big-btn" onclick="nextLevel()">Next Area</button>
         </div>
     </div>
 
     <div id="modal-win" class="overlay">
         <div class="modal">
-            <h2 style="color: var(--gold); text-shadow: 1px 1px 2px #000;">🏛️ HERO OF ROME 🏛️</h2>
-            <p>You saved the citizens from a deadly crush!</p>
-            <p>Final Time: <b id="final-time"></b>s</p>
-            <p>Title: <span id="title-rank" style="font-weight: bold; color: var(--roman-red);">...</span></p>
-            <hr>
+            <h2 style="color: var(--gold); text-shadow: 1px 1px 2px #000;">🏛️ HERO OF ETERNAL ROME 🏛️</h2>
+            <p>All 10 sectors are safe. You are the greatest architect!</p>
+            <p>Final Time Score: <b id="final-time"></b></p>
             <input type="text" id="player-name" placeholder="Your Name..." maxlength="12">
-            <button class="big-btn" onclick="saveScore()">Save My Name</button>
+            <button class="big-btn" onclick="saveScore()">Carve Name in Stone</button>
         </div>
     </div>
 
     <div id="modal-leaderboard" class="overlay">
-        <div class="modal">
-            <h2>📜 Top 10 Heroes</h2>
-            <ol id="score-list"></ol>
-            <button class="big-btn" onclick="location.reload()">Play Again</button>
-        </div>
+        <div class="modal"><h2>📜 Hall of Fame</h2><ol id="score-list"></ol><button class="big-btn" onclick="location.reload()">Rebuild Rome</button></div>
     </div>
 
-    <div id="modal-fail" class="overlay"><div class="modal"><h2>💀 TOO SLOW!</h2><button class="big-btn" onclick="location.reload()">Restart</button></div></div>
+    <div id="modal-fail" class="overlay"><div class="modal"><h2>💀 TOO SLOW!</h2><button class="big-btn" onclick="location.reload()">Try Again</button></div></div>
 
     <script>
         const LEVELS = [
             { name: "Area 1: The Gate", size: 3, glads: 0, hasArch: false },
-            { name: "Area 2: Long Tunnel", size: 4, glads: 1, hasArch: false },
-            { name: "Area 3: Secret Room", size: 5, glads: 2, hasArch: false },
-            { name: "Area 4: The Great Wall", size: 6, glads: 3, hasArch: false },
-            { name: "Area 5: THE BIG ARCH", size: 8, glads: 5, hasArch: true }
+            { name: "Area 2: Training Ground", size: 4, glads: 1, hasArch: false },
+            { name: "Area 3: Hidden Alley", size: 4, glads: 2, hasArch: false },
+            { name: "Area 4: Soldier's Path", size: 5, glads: 3, hasArch: false },
+            { name: "Area 5: THE BIG ARCH", size: 5, glads: 4, hasArch: true },
+            { name: "Area 6: Noble Quarter", size: 6, glads: 5, hasArch: false },
+            { name: "Area 7: Merchant's Maze", size: 7, glads: 6, hasArch: false },
+            { name: "Area 8: Emperor's Way", size: 8, glads: 8, hasArch: true },
+            { name: "Area 9: Imperial Forum", size: 9, glads: 10, hasArch: true },
+            { name: "Area 10: ETERNAL ROME", size: 10, glads: 12, hasArch: true }
         ];
 
         let currentIdx = 0, timeLeft = 60, timerInterval = null, grid = [], isPaused = true;
@@ -173,27 +134,76 @@
 
         function showRules() { document.getElementById('modal-story').style.display='none'; document.getElementById('modal-rules').style.display='flex'; }
         function startGame() { document.getElementById('modal-rules').style.display='none'; currentIdx=0; timeLeft=60; startLevel(); startTimer(); }
-        function startLevel() { isPaused=false; const config=LEVELS[currentIdx]; document.getElementById('level-name').innerText=config.name; const b=document.getElementById('board'); b.style.gridTemplateColumns=`repeat(${config.size}, auto)`; generateLevel(config); render(config); checkConnectivity(config.size); }
-        function startTimer() { if(timerInterval) clearInterval(timerInterval); timerInterval=setInterval(()=>{ if(!isPaused){ timeLeft--; document.getElementById('timer').innerText=timeLeft; if(timeLeft<=10) document.getElementById('timer').classList.add('danger'); if(timeLeft<=0) gameOver(); }}, 1000); }
         
+        function startLevel() { 
+            isPaused=false; const config=LEVELS[currentIdx]; 
+            document.getElementById('level-name').innerText=config.name; 
+            const b=document.getElementById('board'); 
+            b.style.gridTemplateColumns=`repeat(${config.size}, auto)`; 
+            generateLevel(config); 
+            render(config); 
+            checkConnectivity(config.size); 
+        }
+
+        function startTimer() { 
+            if(timerInterval) clearInterval(timerInterval); 
+            timerInterval=setInterval(()=>{ 
+                if(!isPaused){ 
+                    timeLeft--; document.getElementById('timer').innerText=timeLeft; 
+                    if(timeLeft<=10) document.getElementById('timer').classList.add('danger'); 
+                    if(timeLeft<=0) gameOver(); 
+                }
+            }, 1000); 
+        }
+
         function generateLevel(config) {
             grid = []; const size = config.size;
             for(let y=0; y<size; y++) for(let x=0; x<size; x++) grid.push({ x, y, rotation: 0, arms: [], type: 'normal', active: false, el: null });
             getTile(0,0,size).type='start'; getTile(0,0,size).arms=[UP]; getTile(size-1,size-1,size).type='end'; getTile(size-1,size-1,size).arms=[DOWN];
-            let archPos=null; if(config.hasArch){ let mid=Math.floor(size/2); archPos={x:mid,y:mid}; getTile(mid,mid,size).type='arch'; }
-            let g=0; while(g<config.glads){ let rx=Math.floor(Math.random()*size), ry=Math.floor(Math.random()*size); let t=getTile(rx,ry,size); if(t.type==='normal'){t.type='gladiator'; g++;} }
-            if(config.hasArch){ if(!createPath(0,0,archPos.x,archPos.y,size)||!createPath(archPos.x,archPos.y,size-1,size-1,size)) return generateLevel(config); }
-            else { if(!createPath(0,0,size-1,size-1,size)) return generateLevel(config); }
-            grid.forEach(t=>{ if(t.type==='normal'&&t.arms.length===0) t.arms=Math.random()>0.5?[0,2]:[0,1]; if(t.type!=='start'&&t.type!=='end') t.rotation=Math.floor(Math.random()*4); });
+            
+            let archPos=null; 
+            if(config.hasArch){ 
+                let mid=Math.floor(size/2); archPos={x:mid,y:mid}; 
+                let archT = getTile(mid,mid,size);
+                archT.type='arch'; archT.arms=[UP, DOWN]; // 拱门强制设置为上下通
+            }
+            
+            let g=0; while(g<config.glads){ 
+                let rx=Math.floor(Math.random()*size), ry=Math.floor(Math.random()*size); 
+                let t=getTile(rx,ry,size); if(t.type==='normal'){t.type='gladiator'; g++;} 
+            }
+
+            if(config.hasArch){ 
+                if(!createPath(0,0,archPos.x,archPos.y,size)||!createPath(archPos.x,archPos.y,size-1,size-1,size)) return generateLevel(config); 
+            } else { 
+                if(!createPath(0,0,size-1,size-1,size)) return generateLevel(config); 
+            }
+
+            grid.forEach(t=>{ 
+                if(t.type==='normal'&&t.arms.length===0) t.arms=Math.random()>0.5?[0,2]:[0,1]; 
+                // 重点修复：起点、终点、拱门和角斗士不随机旋转
+                if(['start','end','arch','gladiator'].includes(t.type)) {
+                    t.rotation = 0;
+                } else {
+                    t.rotation = Math.floor(Math.random()*4); 
+                }
+            });
         }
 
         function createPath(sx,sy,ex,ey,size) {
-            let curr={x:sx,y:sy}, visited=new Set([`${sx},${sy}`]), steps=500;
+            let curr={x:sx,y:sy}, visited=new Set([`${sx},${sy}`]), steps=1000;
             while((curr.x!==ex||curr.y!==ey)&&steps>0){
-                steps--; let moves=[]; [{dx:1,dy:0,d:RIGHT,o:LEFT},{dx:0,dy:1,d:DOWN,o:UP},{dx:-1,dy:0,d:LEFT,o:RIGHT},{dx:0,dy:-1,d:UP,o:DOWN}].forEach(m=>{
-                    let nx=curr.x+m.dx, ny=curr.y+m.dy; if(nx>=0&&nx<size&&ny>=0&&ny<size&&!visited.has(`${nx},${ny}`)&&getTile(nx,ny,size).type!=='gladiator') moves.push({x:nx,y:ny,d:m.d,o:m.o});
+                steps--; let moves=[]; 
+                [{dx:1,dy:0,d:RIGHT,o:LEFT},{dx:0,dy:1,d:DOWN,o:UP},{dx:-1,dy:0,d:LEFT,o:RIGHT},{dx:0,dy:-1,d:UP,o:DOWN}].forEach(m=>{
+                    let nx=curr.x+m.dx, ny=curr.y+m.dy; 
+                    if(nx>=0&&nx<size&&ny>=0&&ny<size&&!visited.has(`${nx},${ny}`)&&getTile(nx,ny,size).type!=='gladiator') moves.push({x:nx,y:ny,d:m.d,o:m.o});
                 });
-                if(moves.length===0) return false; let move=moves[Math.floor(Math.random()*moves.length)]; getTile(curr.x,curr.y,size).arms.push(move.d); curr={x:move.x,y:move.y}; getTile(curr.x,curr.y,size).arms.push(move.o); visited.add(`${curr.x},${curr.y}`);
+                if(moves.length===0) return false; 
+                let move=moves[Math.floor(Math.random()*moves.length)]; 
+                getTile(curr.x,curr.y,size).arms.push(move.d); 
+                curr={x:move.x,y:move.y}; 
+                getTile(curr.x,curr.y,size).arms.push(move.o); 
+                visited.add(`${curr.x},${curr.y}`);
             }
             return curr.x===ex&&curr.y===ey;
         }
@@ -203,14 +213,36 @@
         function render(config) {
             const b=document.getElementById('board'); b.innerHTML='';
             grid.forEach(t=>{
-                let el=document.createElement('div'); el.className='tile'+(config.size>6?' small':'');
-                if(t.type==='gladiator'){ el.classList.add('gladiator'); el.innerHTML='<div class="icon">⚔️</div>'; }
-                else {
-                    if(t.type==='start') el.innerHTML='<div class="icon">🏟️</div>'; else if(t.type==='end') el.innerHTML='<div class="icon">🚪</div>'; else if(t.type==='arch') { el.classList.add('arch'); el.innerHTML='<div class="icon">🏛️</div>'; }
-                    el.innerHTML+='<div class="pipe-center"></div>'; [...new Set(t.arms)].forEach(d=>el.innerHTML+=`<div class="pipe-arm arm-${d}"></div>`);
-                    if(t.type!=='start'&&t.type!=='end'){ el.onclick=()=>{ if(!isPaused){ t.rotation++; el.style.transform=`rotate(${t.rotation*90}deg)`; let ic=el.querySelector('.icon'); if(ic)ic.style.transform=`translate(-50%,-50%) rotate(-${t.rotation*90}deg)`; checkConnectivity(config.size); }}; }
+                let el=document.createElement('div'); 
+                el.className='tile' + (config.size >= 7 ? ' small' : '');
+                
+                if(t.type==='gladiator'){ 
+                    el.classList.add('gladiator'); 
+                    el.innerHTML='<div class="icon">⚔️</div>'; 
+                } else {
+                    if(t.type==='start') el.innerHTML='<div class="icon">🏟️</div>'; 
+                    else if(t.type==='end') el.innerHTML='<div class="icon">🚪</div>'; 
+                    else if(t.type==='arch') { 
+                        el.classList.add('arch'); 
+                        el.innerHTML='<div class="icon">🏛️</div>'; 
+                    }
+                    el.innerHTML+='<div class="pipe-center"></div>'; 
+                    [...new Set(t.arms)].forEach(d=>el.innerHTML+=`<div class="pipe-arm arm-${d}"></div>`);
+                    
+                    // 只有普通地砖可以旋转
+                    if(t.type === 'normal'){ 
+                        el.onclick=()=>{ 
+                            if(!isPaused){ 
+                                t.rotation++; el.style.transform=`rotate(${t.rotation*90}deg)`; 
+                                checkConnectivity(config.size); 
+                            }
+                        }; 
+                    } else {
+                        el.style.cursor = 'default';
+                    }
                 }
-                el.style.transform=`rotate(${t.rotation*90}deg)`; let ic=el.querySelector('.icon'); if(ic)ic.style.transform=`translate(-50%,-50%) rotate(-${t.rotation*90}deg)`; t.el=el; b.appendChild(el);
+                el.style.transform=`rotate(${t.rotation*90}deg)`; 
+                t.el=el; b.appendChild(el);
             });
         }
 
@@ -229,22 +261,18 @@
         }
 
         function tArms(t) { return t.arms.map(a=>(a+(t.rotation%4))%4); }
-
         function handleWin() {
             isPaused=true; const f=document.getElementById('flash'); f.classList.add('victory-flash'); setTimeout(()=>f.classList.remove('victory-flash'),500);
-            if(currentIdx===LEVELS.length-1){ clearInterval(timerInterval); document.getElementById('final-time').innerText=timeLeft; let rank="Young Builder"; if(timeLeft>50) rank="Master Architect"; else if(timeLeft>30) rank="Great Engineer"; document.getElementById('title-rank').innerText=rank; document.getElementById('modal-win').style.display='flex'; }
-            else { timeLeft+=30; document.getElementById('modal-next').style.display='flex'; }
+            if(currentIdx===LEVELS.length-1){ clearInterval(timerInterval); document.getElementById('final-time').innerText=timeLeft + "s"; document.getElementById('modal-win').style.display='flex'; }
+            else { timeLeft+=35; document.getElementById('modal-next').style.display='flex'; }
         }
-
         function nextLevel() { document.getElementById('modal-next').style.display='none'; currentIdx++; startLevel(); }
         function gameOver() { isPaused=true; clearInterval(timerInterval); document.getElementById('modal-fail').style.display='flex'; }
-        
         function saveScore() {
             const name=document.getElementById('player-name').value.trim()||"Roman Hero";
             let h=JSON.parse(localStorage.getItem('vomitoria_scores'))||[]; h.push({name:name,score:timeLeft}); h.sort((a,b)=>b.score-a.score); h=h.slice(0,10); localStorage.setItem('vomitoria_scores',JSON.stringify(h)); showLeaderboard();
         }
-
-        function showLeaderboard() { document.querySelectorAll('.overlay').forEach(e=>e.style.display='none'); const list=document.getElementById('score-list'); const h=JSON.parse(localStorage.getItem('vomitoria_scores'))||[]; list.innerHTML=h.map((s,i)=>`<li><span class="${i<3?'rank-top':''}">#${i+1} ${s.name}</span><span>${s.score}s</span></li>`).join(''); document.getElementById('modal-leaderboard').style.display='flex'; }
+        function showLeaderboard() { document.querySelectorAll('.overlay').forEach(e=>e.style.display='none'); const list=document.getElementById('score-list'); const h=JSON.parse(localStorage.getItem('vomitoria_scores'))||[]; list.innerHTML=h.map((s,i)=>`<li><span>#${i+1} ${s.name}</span><span>${s.score}s</span></li>`).join(''); document.getElementById('modal-leaderboard').style.display='flex'; }
     </script>
 </body>
 </html>
